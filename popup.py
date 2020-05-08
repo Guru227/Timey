@@ -1,35 +1,61 @@
-"""Generate a pop-up window for special messages."""
-from tkinter import *
-import tkinter.font as font
+"""Generate a pop-up window for Timey."""
+try:                         # Python2  
+    from Tkinter import *       # capital 'T'
+    import Tkinter.font as font
+    import thread 
+except ImportError:          # Python3
+    from tkinter import *       # lowercase 't'
+    import tkinter.font as font
+    import _thread as thread    # Note: backward compatibility
+import time
+
+
 def alert_popup(title, message, path):
     
-    root = Tk()
-    root.title(title)
-    w = 600     # popup window width
-    h = 200     # popup window height
-    sw = root.winfo_screenwidth()
-    sh = root.winfo_screenheight()    
-    x = (sw - w)/2
-    y = (sh - h)/2
-    root.geometry('%dx%d+%d+%d' % (w, h, x, y))
-    #top padding
-    p1 = Label(root, text='', width = 50, height = 2)
-    p1['font'] = font.Font(size=15)
-    p1.pack()
-    #head label
-    head = Label(root, text=message, width = 50, height = 1)
-    head['font'] = font.Font(size=20)
-    head.pack()
-    #quote
-    quote = Label(root, text=path, width=120, height = 1)
-    quote.pack()
-    #padding between button and quote
-    p2 = Label(root, text='', width = 50, height = 2)
-    p2.pack()
-    #button
-    b = Button(root, text="OK", command=root.destroy, width=10)
-    b.pack()
+    root=init_window(title)
+
+    #structure
+    padding(root, 2, 15)
+    make_label(root, message, 20)
+    make_label(root, path, 9)
+    padding(root, 2, 9)
+    make_quit(root, "OK")
+    
     mainloop()
 
+def init_window(t): #title
+    box = Tk()
+    box.title(t)
+    w = 600     # popup window width
+    h = 200     # popup window height
+    sw = box.winfo_screenwidth()
+    sh = box.winfo_screenheight()    
+    x = (sw - w)/2
+    y = (sh - h)/2
+    box.geometry('%dx%d+%d+%d' % (w, h, x, y))
+    return box
 
+def padding(box, h, f):   #height, font size
+    p = Label(box, text='', height = h)
+    p['font'] = font.Font(size=f)
+    p.pack()
 
+def make_label(box, t, f):    #text, font size
+    lbl = Label(box, text=t, height = 1)
+    lbl['font'] = font.Font(size=f)
+    lbl.pack()
+
+#window destroy button
+def make_quit(box, txt):  #button text  
+    b = Button(box, text=txt, command = box.destroy, width=10, state='disabled')
+    b.pack()
+    thread.start_new_thread(stall, (b, ))
+
+def stall(object):        #enable button after 30 sec
+    print("stall running")
+    time.sleep(30)
+    object.config(state = 'normal')
+    
+    
+if(__name__ == "__main__"):
+    alert_popup("Timey", "Up you go!", "Time to stretch")
